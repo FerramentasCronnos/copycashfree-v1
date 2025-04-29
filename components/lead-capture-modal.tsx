@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useRouter } from "next/navigation"
-import { useToast } from "@/hooks/use-toast"
 
 // Modificar a interface LeadCaptureModalProps para incluir o webhook
 interface LeadCaptureModalProps {
@@ -25,61 +24,34 @@ export function LeadCaptureModal({ isOpen, onOpenChange, telegramLink, webhookUr
   const [phone, setPhone] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
-  const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
     try {
-      // Validação básica dos campos
-      if (!name.trim() || !email.trim() || !phone.trim()) {
-        throw new Error("Por favor, preencha todos os campos")
-      }
-
       // Enviar os dados para o webhook
       const response = await fetch(webhookUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          phone: phone.trim(),
+          name,
+          email,
+          phone,
           source: window.location.href,
           timestamp: new Date().toISOString(),
         }),
+        headers: { "Content-Type": "application/json" },
       })
 
       if (!response.ok) {
         throw new Error("Falha ao enviar dados para o webhook")
       }
 
-      // Mostrar mensagem de sucesso
-      toast({
-        title: "Sucesso!",
-        description: "Seus dados foram enviados com sucesso.",
-        variant: "default",
-      })
-
-      // Limpar o formulário
-      setName("")
-      setEmail("")
-      setPhone("")
-
-      // Redireciona para o link do Telegram após um pequeno delay
-      setTimeout(() => {
-        window.location.href = telegramLink
-      }, 1500)
-
+      // Redireciona para o link do Telegram
+      window.location.href = telegramLink
     } catch (error) {
       console.error("Erro ao enviar dados:", error)
-      toast({
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Ocorreu um erro ao processar seu cadastro. Por favor, tente novamente.",
-        variant: "destructive",
-      })
+      alert("Ocorreu um erro ao processar seu cadastro. Por favor, tente novamente.")
     } finally {
       setIsSubmitting(false)
     }
@@ -105,7 +77,6 @@ export function LeadCaptureModal({ isOpen, onOpenChange, telegramLink, webhookUr
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              disabled={isSubmitting}
             />
           </div>
           <div className="space-y-2">
@@ -117,7 +88,6 @@ export function LeadCaptureModal({ isOpen, onOpenChange, telegramLink, webhookUr
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={isSubmitting}
             />
           </div>
           <div className="space-y-2">
@@ -129,7 +99,6 @@ export function LeadCaptureModal({ isOpen, onOpenChange, telegramLink, webhookUr
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
-              disabled={isSubmitting}
             />
           </div>
           <Button
