@@ -16,11 +16,11 @@ export default function LandingPage() {
       <div className="w-full max-w-md flex flex-col items-center px-4 py-6">
         {/* Título principal */}
         <h1 className="text-2xl font-bold text-center mb-2">
-          DESCUBRA UMA NOVA FONTE
+          Use Absolutamente De Graça O Método Copy Cash
           <br />
-          DE RENDA ATRAVÉS DO
+          Que Tá Gerando De R$300 A R$1.250/Mês
           <br />
-          <span className="text-blue-500">MERCADO FINANCEIRO</span>
+          <span className="text-blue-500">Mesmo Para Iniciantes No Mercado Financeiro.</span>
         </h1>
 
         {/* Imagem principal */}
@@ -58,11 +58,11 @@ export default function LandingPage() {
         <div className="w-full space-y-2 flex flex-col items-center">
           <div className="flex items-center justify-center gap-2">
             <div className="text-blue-500 flex-shrink-0">🔄</div>
-            <p className="text-sm">Operações 100% Ao vivo</p>
+            <p className="text-sm">Operações ao vivo todo dia.</p>
           </div>
           <div className="flex items-center justify-center gap-2">
             <div className="text-blue-500 flex-shrink-0">📊</div>
-            <p className="text-sm">Estratégias Validadas</p>
+            <p className="text-sm">Para iniciantes e quem já opera.</p>
           </div>
         </div>
       </div>
