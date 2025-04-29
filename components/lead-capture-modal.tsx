@@ -69,17 +69,6 @@ export function LeadCaptureModal({ isOpen, onOpenChange, telegramLink, webhookUr
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nome</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Seu nome completo"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
