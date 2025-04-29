@@ -18,9 +18,9 @@ export default function LandingPage() {
         <h1 className="text-2xl font-bold text-center mb-2">
           Use Absolutamente De Graça O Método Copy Cash
           <br />
-          Que Tá Gerando De R$300 A R$1.250/Mês
+          <span className="text-blue-500"> Que Tá Gerando De R$300 A R$1.250/Mês </span>
           <br />
-          <span className="text-blue-500">Mesmo Para Iniciantes No Mercado Financeiro.</span>
+          Mesmo Para Iniciantes No Mercado Financeiro.
         </h1>
 
         {/* Imagem principal */}
