@@ -1,13 +1,13 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useRouter } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
 
 // Modificar a interface LeadCaptureModalProps para incluir o webhook
 interface LeadCaptureModalProps {
@@ -17,41 +17,110 @@ interface LeadCaptureModalProps {
   webhookUrl: string
 }
 
+interface UTMParams {
+  utm_source?: string
+  utm_medium?: string
+  utm_campaign?: string
+  utm_term?: string
+  utm_content?: string
+}
+
 // Atualizar a função para receber o webhook como prop
 export function LeadCaptureModal({ isOpen, onOpenChange, telegramLink, webhookUrl }: LeadCaptureModalProps) {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [utmParams, setUtmParams] = useState<UTMParams>({})
   const router = useRouter()
+  const { toast } = useToast()
+
+  // Função para extrair parâmetros UTM da URL
+  const getUTMParams = () => {
+    if (typeof window === 'undefined') return {}
+    
+    const params = new URLSearchParams(window.location.search)
+    const utmParams: UTMParams = {}
+    
+    // Lista de parâmetros UTM que queremos capturar
+    const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']
+    
+    utmKeys.forEach(key => {
+      const value = params.get(key)
+      if (value) {
+        utmParams[key as keyof UTMParams] = value
+      }
+    })
+    
+    return utmParams
+  }
+
+  // Capturar parâmetros UTM quando o componente montar
+  useEffect(() => {
+    setUtmParams(getUTMParams())
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
     try {
+      // Validação básica dos campos
+      if (!name.trim() || !email.trim() || !phone.trim()) {
+        throw new Error("Por favor, preencha todos os campos")
+      }
+
+      // Preparar dados para envio
+      const formData = {
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        source: window.location.href,
+        timestamp: new Date().toISOString(),
+        // Incluir parâmetros UTM
+        ...utmParams,
+        // Adicionar campos específicos do ActiveCampaign
+        tags: ['copy-cash', 'landing-page'],
+        list: '1', // Substitua pelo ID da sua lista no ActiveCampaign
+      }
+
       // Enviar os dados para o webhook
       const response = await fetch(webhookUrl, {
         method: "POST",
-        body: JSON.stringify({
-          name,
-          email,
-          phone,
-          source: window.location.href,
-          timestamp: new Date().toISOString(),
-        }),
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       })
 
       if (!response.ok) {
         throw new Error("Falha ao enviar dados para o webhook")
       }
 
-      // Redireciona para o link do Telegram
-      window.location.href = telegramLink
+      // Mostrar mensagem de sucesso
+      toast({
+        title: "Sucesso!",
+        description: "Seus dados foram enviados com sucesso.",
+        variant: "default",
+      })
+
+      // Limpar o formulário
+      setName("")
+      setEmail("")
+      setPhone("")
+
+      // Redireciona para o link do Telegram após um pequeno delay
+      setTimeout(() => {
+        window.location.href = telegramLink
+      }, 1500)
+
     } catch (error) {
       console.error("Erro ao enviar dados:", error)
-      alert("Ocorreu um erro ao processar seu cadastro. Por favor, tente novamente.")
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : "Ocorreu um erro ao processar seu cadastro. Por favor, tente novamente.",
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -69,6 +138,18 @@ export function LeadCaptureModal({ isOpen, onOpenChange, telegramLink, webhookUr
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
+            <Label htmlFor="name">Nome</Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="Seu nome completo"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
@@ -77,6 +158,7 @@ export function LeadCaptureModal({ isOpen, onOpenChange, telegramLink, webhookUr
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={isSubmitting}
             />
           </div>
           <div className="space-y-2">
@@ -88,6 +170,7 @@ export function LeadCaptureModal({ isOpen, onOpenChange, telegramLink, webhookUr
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
+              disabled={isSubmitting}
             />
           </div>
           <Button
