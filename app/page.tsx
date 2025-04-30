@@ -42,7 +42,10 @@ export default function LandingPage() {
         {/* Botão de ação */}
         <Button
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-md text-lg"
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            // Abrir o modal para captura de leads
+            setIsModalOpen(true)
+          }}
         >
           CLIQUE AQUI PARA ACESSAR
         </Button>

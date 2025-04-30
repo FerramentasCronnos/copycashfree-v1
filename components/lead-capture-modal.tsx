@@ -37,21 +37,21 @@ export function LeadCaptureModal({ isOpen, onOpenChange, telegramLink, webhookUr
 
   // Função para extrair parâmetros UTM da URL
   const getUTMParams = () => {
-    if (typeof window === 'undefined') return {}
-    
+    if (typeof window === "undefined") return {}
+
     const params = new URLSearchParams(window.location.search)
     const utmParams: UTMParams = {}
-    
+
     // Lista de parâmetros UTM que queremos capturar
-    const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']
-    
-    utmKeys.forEach(key => {
+    const utmKeys = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]
+
+    utmKeys.forEach((key) => {
       const value = params.get(key)
       if (value) {
         utmParams[key as keyof UTMParams] = value
       }
     })
-    
+
     return utmParams
   }
 
@@ -66,62 +66,55 @@ export function LeadCaptureModal({ isOpen, onOpenChange, telegramLink, webhookUr
 
     try {
       // Validação básica dos campos
-      if (!name.trim() || !email.trim() || !phone.trim()) {
+      if (!email.trim() || !phone.trim()) {
         throw new Error("Por favor, preencha todos os campos")
       }
 
       // Preparar dados para envio
       const formData = {
-        name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
         source: window.location.href,
         timestamp: new Date().toISOString(),
         // Incluir parâmetros UTM
         ...utmParams,
-        // Adicionar campos específicos do ActiveCampaign
-        tags: ['copy-cash', 'landing-page'],
-        list: '1', // Substitua pelo ID da sua lista no ActiveCampaign
       }
 
       // Enviar os dados para o webhook
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
+      try {
+        await fetch(webhookUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        })
 
-      if (!response.ok) {
-        throw new Error("Falha ao enviar dados para o webhook")
+        console.log("Dados enviados com sucesso para o webhook")
+      } catch (webhookError) {
+        // Apenas registrar o erro, mas continuar com o redirecionamento
+        console.error("Erro ao enviar dados para o webhook:", webhookError)
       }
 
-      // Mostrar mensagem de sucesso
-      toast({
-        title: "Sucesso!",
-        description: "Seus dados foram enviados com sucesso.",
-        variant: "default",
-      })
-
       // Limpar o formulário
-      setName("")
       setEmail("")
       setPhone("")
 
-      // Redireciona para o link do Telegram após um pequeno delay
-      setTimeout(() => {
-        window.location.href = telegramLink
-      }, 1500)
+      // Fechar o modal
+      onOpenChange(false)
 
+      // Redirecionar imediatamente para o Telegram
+      window.location.href = telegramLink
     } catch (error) {
-      console.error("Erro ao enviar dados:", error)
+      console.error("Erro ao processar formulário:", error)
       toast({
         title: "Erro",
-        description: error instanceof Error ? error.message : "Ocorreu um erro ao processar seu cadastro. Por favor, tente novamente.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Ocorreu um erro ao processar seu cadastro. Por favor, tente novamente.",
         variant: "destructive",
       })
-    } finally {
       setIsSubmitting(false)
     }
   }
