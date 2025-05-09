@@ -7,7 +7,7 @@ import { LeadCaptureModal } from "@/components/lead-capture-modal"
 
 export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const telegramLink = "https://t.me/copycashforexfree"
+  const telegramLink = "https://t.me/+sozyYG-y-J0zNjEx"
   const webhookUrl = "https://hook.us1.make.com/vprf2fax8g6giy7emdlr4vrdok5wjvpz"
 
   return (
